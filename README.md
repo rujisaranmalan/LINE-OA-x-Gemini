@@ -1,15 +1,26 @@
-Gemini 1.5 Flash-8B Integration Project
-Overview
-This project demonstrates how to integrate Google's Gemini 1.5 Flash-8B model to generate text responses from text prompts as well as multimodal responses for images. The project supports both text-based and multimodal (image) inputs using the Gemini 1.5 Flash-8B model, allowing developers to leverage the power of AI in generating insightful responses and analyzing visual data.
+# **Gemini 1.5 Flash-8B Integration Project**
 
-Features
-Text-based Input: Generates responses from a prompt using the Gemini 1.5 Flash-8B model.
-Multimodal Input: Supports image-based input, allowing the model to describe or analyze an image.
-Efficient and Fast: Built for low compute tasks, ensuring quick response times while maintaining quality.
-Technologies Used
-Node.js: Backend JavaScript environment.
-Google Gemini 1.5 Flash-8B: The AI model powering text and multimodal generation.
-Prerequisites
-Node.js installed (v14 or higher).
-A valid API key for Google AI services with access to the Gemini 1.5 Flash-8B model.
-The genAI library installed to interface with Google's Generative AI services.
+## **Overview**
+
+This project demonstrates how to integrate Google’s **Gemini 1.5 Flash-8B** model to generate responses from both text prompts and multimodal inputs (images). The project showcases how developers can leverage the model’s AI capabilities for insightful text-based outputs and visual data analysis.
+
+## **Features**
+- **Text-based Input**: Generates responses from a prompt using the Gemini 1.5 Flash-8B model.
+- **Multimodal Input**: Accepts image-based input and provides a descriptive analysis of the image.
+- **Efficiency**: Optimized for low-compute tasks, ensuring quick response times while maintaining high quality.
+
+## **Technologies Used**
+- **Node.js**: Backend JavaScript runtime environment.
+- **Google Gemini 1.5 Flash-8B**: AI model for generating text and multimodal content.
+
+## **Prerequisites**
+- **Node.js** (v14 or higher)
+- **API Access**: You need a valid API key for Google AI services to access the Gemini 1.5 Flash-8B model.
+- **genAI Library**: Installed to interface with Google’s Generative AI services.
+
+## **Installation**
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/yourusername/gemini-integration.git
+   cd gemini-integration
