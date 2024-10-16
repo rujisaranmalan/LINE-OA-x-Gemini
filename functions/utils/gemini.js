@@ -1,5 +1,8 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { db } = require('../../firebase.config');
+const admin = require('firebase-admin'); // Added for Firestore FieldValue
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+const getDocumentData = require('../index')
 
 const textOnly = async (prompt) => {
   // For text-only input, use the gemini-1.5-pro model
@@ -9,51 +12,64 @@ const textOnly = async (prompt) => {
 };
 
 const multimodal = async (imageBinary) => {
-    // For multimodal input, use the gemini-1.5-pro model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    const prompt = "ช่วยบรรยายภาพนี้ให้หน่อย";
-    const mimeType = "image/png";
+  // For multimodal input, use the gemini-1.5-pro model
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const prompt = "ช่วยบรรยายภาพนี้ให้หน่อย";
+  const mimeType = "image/png";
 
-    const imageParts = [
-      {
-        inlineData: {
-          data: Buffer.from(imageBinary, "binary").toString("base64"),
-          mimeType,
-        },
+  const imageParts = [
+    {
+      inlineData: {
+        data: Buffer.from(imageBinary, "binary").toString("base64"),
+        mimeType,
       },
-    ];
+    },
+  ];
 
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const text = result.response.text();
-    return text;
+  const result = await model.generateContent([prompt, ...imageParts]);
+  return result.response.text();
 };
 
 const chat = async (prompt) => {
+  try{
   // For chat-based input, use the gemini-1.5-pro model for consistency
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+  // Start a new chat with the provided prompt and limited chat history
   const chat = model.startChat({
     history: [
-      {
-        role: "user",
-        parts: [{ text: "สวัสดีจ้า" }],
-      },
-      {
-        role: "model",
-        parts: [{ text: "สวัสดีครับ ผมชื่ออาเฉิน ผมเป็นผู้เชี่ยวชาญเกี่ยวกับ LINE API ที่ช่วยตอบคำถามและแบ่งปันความรู้ให้กับชุมขนนักพัฒนา" }],
-      },
-      {
-        role: "user",
-        parts: [{ text: "ปัจจุบันมี LINE API อะไรบ้างที่ใช้งานได้ในประเทศไทย" }],
-      },
-      {
-        role: "model",
-        parts: [{ text: "ปัจจุบันมีทั้ง Messaging API, LIFF, LINE Login, LINE Beacon, LINE Notify, LINE Pay, และ LINE MINI App ที่สามารถใช้งานในไทยได้ครับ" }],
-      },
+      // Limit the history to the last 5 messages if available
+      ...(getDocumentData ? getDocumentData().slice(-5) : []),
+      { role: "user", parts: [{ text: prompt }] }
     ]
   });
 
   const result = await chat.sendMessage(prompt);
+  console.log("RESULT MESSAGE", result)
+
+  // Store the chat history in Firestore
+  const chatHistoryRef =  db.collection('line-chat-history').doc('history');
+  await chatHistoryRef.set({
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    sender: "user",
+    message: prompt,
+  });
+
+  await chatHistoryRef.collection('messages').add({
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    sender: "model",
+    message: result.response.text(),
+  });
+
+  await chatHistoryRef()
+
   return result.response.text();
+  
+  }
+  catch (error) {
+    console.error("Error during chat interaction:", error);
+    // Handle the error appropriately, such as displaying an error message to the user.
+  }
 };
 
 module.exports = { textOnly, multimodal, chat };
